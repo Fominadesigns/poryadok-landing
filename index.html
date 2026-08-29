@@ -56,7 +56,13 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* Запобіжник від горизонтальної прокрутки. Саме clip, а не hidden:
+     hidden робить сторінку контейнером прокрутки й ламає position:sticky
+     у шапки та заголовків секцій. */
+  overflow-x: clip;
+}
 
 body {
   margin: 0;
@@ -271,53 +277,47 @@ main, footer { position: relative; z-index: 1; }
 /* Пляма світла. Без неї чорне тло виглядає порожнім, а не глибоким.
    Повільно дрейфує — рівно настільки, щоб сторінка здавалась живою,
    але ніхто не помітив самого руху. */
-.aura { position: relative; }
-
-.aura::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  width: 74vw;
-  height: 74vw;
-  max-width: 840px;
-  max-height: 840px;
-  background: radial-gradient(
+.aura {
+  position: relative;
+  background-repeat: no-repeat;
+  background-image: radial-gradient(
     circle,
-    color-mix(in oklab, var(--accent) 13%, transparent),
-    transparent 66%
+    color-mix(in oklab, var(--accent) 15%, transparent),
+    transparent 62%
   );
+  background-size: 130% 150%;
   animation: drift 28s ease-in-out infinite alternate;
 }
 
-.aura.from-left::after { left: -26%; top: -12%; }
-.aura.from-right::after { right: -22%; top: 2%; animation-delay: -9s; }
-.aura.from-bottom::after { right: -14%; bottom: -32%; animation-delay: -17s; }
-.aura.from-top-right::after { right: -20%; top: -30%; animation-delay: -22s; }
+.aura.from-left { background-position: -25% -25%; }
+.aura.from-right { background-position: 125% -15%; animation-delay: -9s; }
+.aura.from-bottom { background-position: 120% 120%; animation-delay: -17s; }
 
 /* Пляма завжди контрастує з тлом, а не повторює його.
    На чорному й на білому світиться кислотним, на кислотному — білим.
    Якби вона всюди була однакова, на світлих екранах її просто не було б
    видно, і ритм розсипався б рівно там, де він найпомітніший. */
-section.light.aura::after {
-  background: radial-gradient(
+section.light.aura {
+  background-image: radial-gradient(
     circle,
-    color-mix(in oklab, var(--accent) 42%, transparent),
-    transparent 64%
-  );
-}
-
-section.acid.aura::after {
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, .55),
+    color-mix(in oklab, var(--accent) 45%, transparent),
     transparent 62%
   );
 }
 
+section.acid.aura {
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, .6),
+    transparent 60%
+  );
+}
+
+/* Дихає розміром фону, а не рухом блока: рухати нічого, отже й вилізти
+   нікуди. */
 @keyframes drift {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(5%, 7%, 0) scale(1.14); }
+  from { background-size: 130% 150%; }
+  to { background-size: 160% 180%; }
 }
 
 .hero::after {
@@ -893,7 +893,7 @@ section.acid {
 }
 
 section.light {
-  background: var(--paper);
+  background-color: var(--paper);
   color: var(--paper-text);
   --text: var(--paper-text);
   --muted: var(--paper-muted);
@@ -905,7 +905,7 @@ section.light {
 }
 
 section.acid {
-  background: var(--accent);
+  background-color: var(--accent);
   color: var(--on-accent);
   --text: var(--on-accent);
   --muted: color-mix(in oklab, var(--on-accent) 62%, transparent);
@@ -1046,7 +1046,7 @@ section.acid .plan:not(.main) .btn.ghost {
   /* Прибираємо рух, а не самі предмети: наліпка лишається під кутом,
      блоки лишаються видимими, світло лишається на місці. */
   .sticker { animation: none; transform: rotate(-3deg); }
-  .aura::after, .btn.solid::after, .glint::before { animation: none; }
+  .aura, .btn.solid::after, .glint::before { animation: none; }
   .shimmer { animation: none; background: none; -webkit-text-fill-color: currentColor; color: var(--accent); }
   [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
@@ -1186,7 +1186,7 @@ section.acid .plan:not(.main) .btn.ghost {
   </section>
 
   <!-- ─── Як працює ─── -->
-  <section class="light" id="how">
+  <section class="light aura from-right" id="how">
     <div class="wrap">
       <span class="mark" data-mark aria-hidden="true">
         <svg viewBox="0 0 24 24"><path pathLength="24" d="M20 6 9 17l-5-5"/></svg>
@@ -1331,7 +1331,7 @@ section.acid .plan:not(.main) .btn.ghost {
   </section>
 
   <!-- ─── Ціни ─── -->
-  <section class="acid" id="price">
+  <section class="acid aura from-left" id="price">
     <div class="wrap">
       <span class="mark" data-mark aria-hidden="true">
         <svg viewBox="0 0 24 24"><path pathLength="24" d="M20 6 9 17l-5-5"/></svg>
@@ -1379,7 +1379,7 @@ section.acid .plan:not(.main) .btn.ghost {
   </section>
 
   <!-- ─── Питання ─── -->
-  <section id="faq">
+  <section id="faq" class="aura from-bottom">
     <div class="wrap">
       <span class="mark" data-mark aria-hidden="true">
         <svg viewBox="0 0 24 24"><path pathLength="24" d="M20 6 9 17l-5-5"/></svg>
