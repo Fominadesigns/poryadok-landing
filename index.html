@@ -82,7 +82,9 @@ body {
   width: 100%;
   max-width: 1140px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 40px);
+  /* На телефоні 20 пікселів замало: текст і кнопки притискаються до
+     самої рамки екрана й виглядають так, ніби їх обрізали. */
+  padding: 0 clamp(24px, 5vw, 40px);
 }
 
 /* ─── Шапка ─────────────────────────────────────────────────────────────── */
@@ -102,7 +104,11 @@ header {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 15px 0;
+  /* Тільки згори й знизу. Скорочений запис padding: 15px 0 обнуляв би
+     бічні відступи, які ставить .wrap, — і назва з кнопкою притискались
+     до самих країв екрана. */
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .logo {
@@ -362,6 +368,13 @@ section.acid.aura {
 
 @media (max-width: 940px) {
   .hero-grid { grid-template-columns: minmax(0, 1fr); }
+
+  /* Кнопки й наліпка по центру: у вузькій колонці вони єдині предмети
+     в рядку, і зсув до лівого краю читається як недогляд. Заголовок
+     і текст лишаються зліва — центрований абзац на чотири рядки
+     читається гірше. */
+  .cta-row { justify-content: center; }
+  .sticker { align-self: center; }
   /* На телефоні макет по центру, а не притиснутий до лівого краю:
      у вузькій колонці він єдиний предмет у рядку, і зсув убік читається
      як помилка верстки. */
@@ -490,8 +503,9 @@ h1 em { font-style: normal; color: var(--accent); }
 .badges { display: flex; flex-wrap: wrap; gap: 9px; flex: 1; }
 
 @media (max-width: 820px) {
-  .proof { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .proof { flex-direction: column; align-items: center; gap: 14px; text-align: center; }
   .proof-title { max-width: none; }
+  .badges { justify-content: center; }
 }
 
 .badge {
@@ -768,7 +782,7 @@ footer a:hover { color: var(--text); }
    поки око ще шукає, куди дивитись. */
 .mark.drawn svg {
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1.4s var(--ease) 1s;
+  transition: stroke-dashoffset 1.4s var(--ease);
 }
 
 .mark.drawn { transition: border-color .8s var(--ease) .5s; }
@@ -1527,15 +1541,35 @@ section.acid .plan:not(.main) .btn.ghost {
     return;
   }
 
+  // Дві секунди на роздивитись — і лише потім галочка. Таймером, а не
+  // затримкою в CSS: затримка спрацьовувала на будь-яку зміну стану,
+  // і поведінка виглядала випадковою.
+  var timers = new WeakMap();
+
   var watcher = new IntersectionObserver(
     function (entries) {
       entries.forEach(function (entry) {
-        entry.target.classList.toggle("drawn", entry.isIntersecting);
+        var mark = entry.target;
+        clearTimeout(timers.get(mark));
+
+        if (!entry.isIntersecting) {
+          // Пішли з розділу — стираємо одразу, без церемоній.
+          mark.classList.remove("drawn");
+          return;
+        }
+
+        timers.set(
+          mark,
+          setTimeout(function () {
+            mark.classList.add("drawn");
+          }, 2000),
+        );
       });
     },
-    // Верхня третина екрана: галочка ставиться, коли розділ уже під очима,
-    // а не коли він тільки визирнув знизу.
-    { rootMargin: "-12% 0px -62% 0px" },
+    // Широка смуга — майже весь екран, крім самого низу. Вузька виглядала
+    // акуратніше, але при швидкому гортанні значок не встигав пробути
+    // в ній дві секунди й галочка не з-являлась зовсім.
+    { rootMargin: "-5% 0px -30% 0px" },
   );
 
   marks.forEach(function (mark) { watcher.observe(mark); });
