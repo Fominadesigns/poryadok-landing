@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Порядок — чек-листи зміни з фотозвітом у Telegram</title>
-<meta name="description" content="Співробітник проходить чек-лист і прикладає фото. Ви бачите, що зроблено на кожній точці, просто зараз. 299 ₴ на місяць за точку.">
+<meta name="description" content="Співробітник проходить чек-лист і прикладає фото. Ви бачите, що зроблено на кожній точці, просто зараз. 14 днів безкоштовно, далі 299 ₴ за точку.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -346,6 +346,7 @@ section.acid.aura::after {
    має побачити, що саме отримає його людина, ще до того, як прочитає
    слово «чек-лист». */
 .hero-grid {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
   gap: clamp(28px, 5vw, 64px);
@@ -390,6 +391,25 @@ h1 em { font-style: normal; color: var(--accent); }
    виникає в голові власника («знову щось встановлювати людям»), і воно
    має зніматись до того, як він устигне його сформулювати.
    Тому — окремий предмет, під кутом, ніби наклеєний зверху. */
+/* Наліпка сидить у проміжку між текстом і телефоном, трохи налізаючи
+   на обидва. Саме тому вона й помітна: предмет, який лежить ПОВЕРХ
+   розкладки, око знаходить раніше за той, що стоїть у ряду. */
+@media (min-width: 941px) {
+  .sticker {
+    position: absolute;
+    left: 48%;
+    top: 20%;
+    transform: translateX(-50%) rotate(-3deg);
+    z-index: 3;
+    animation-name: breathe-centred;
+  }
+
+  @keyframes breathe-centred {
+    0%, 100% { transform: translateX(-50%) rotate(-3deg) scale(1); }
+    50% { transform: translateX(-50%) rotate(-1.6deg) scale(1.04); }
+  }
+}
+
 .sticker {
   display: inline-flex;
   flex-direction: column;
@@ -711,11 +731,22 @@ footer a:hover { color: var(--text); }
      й вона поїхала б від будь-якої зміни розміру. */
   stroke-dasharray: 24;
   stroke-dashoffset: 24;
-  transition: stroke-dashoffset .55s var(--ease);
+  /* Стирання — швидке й одразу: людина вже гортає далі, чекати нічого. */
+  transition: stroke-dashoffset .4s var(--ease);
 }
 
 .mark.drawn { border-color: var(--accent); }
-.mark.drawn svg { stroke-dashoffset: 0; }
+
+/* А малювання — повільне й із затримкою. Спершу людина встигає
+   роздивитись екран, і лише потім, ніби сама собою, з-являється галочка.
+   Без затримки анімації просто не видно: вона встигає закінчитись,
+   поки око ще шукає, куди дивитись. */
+.mark.drawn svg {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1.4s var(--ease) 1s;
+}
+
+.mark.drawn { transition: border-color .8s var(--ease) .5s; }
 
 /* На кислотному екрані галочка біла: кислотна на кислотному зникла б. */
 section.acid .mark { border-color: rgba(10, 11, 10, .28); }
@@ -1314,14 +1345,14 @@ section.acid .plan:not(.main) .btn.ghost {
       <div class="plans">
         <div data-reveal class="plan">
           <div class="plan-name">Проба</div>
-          <div class="price">0 ₴ <span>назавжди</span></div>
+          <div class="price">14 днів <span>безкоштовно</span></div>
           <ul>
-            <li>Одна точка</li>
-            <li>Два чек-листи, троє людей</li>
-            <li>Фото зберігаються тиждень</li>
-            <li>Сповіщення власнику</li>
+            <li>Увесь продукт без обмежень</li>
+            <li>Скільки завгодно точок і людей</li>
+            <li>Фото, сповіщення, графік змін</li>
+            <li>Без картки — просто відкрийте бот</li>
           </ul>
-          <p class="plan-note">Без картки й без строку. Одна кав'ярня може працювати так завжди.</p>
+          <p class="plan-note">Два тижні, а не два дні: перші кілька днів ідуть на налаштування, а головне видно вже в роботі.</p>
           <a class="btn ghost" href="https://t.me/poriadok_app_bot">Почати</a>
         </div>
 
@@ -1333,10 +1364,10 @@ section.acid .plan:not(.main) .btn.ghost {
             <li>Чек-листи без обмежень</li>
             <li>Фото зберігаються 90 днів</li>
             <li>Графік змін і облік годин</li>
-            <li>Перший місяць безкоштовно</li>
+            <li>Перші два тижні безкоштовно</li>
           </ul>
           <p class="plan-note">Мережа з восьми точок — 2400 ₴ на місяць.</p>
-          <a class="btn solid" href="https://t.me/poriadok_app_bot">Місяць безкоштовно</a>
+          <a class="btn solid" href="https://t.me/poriadok_app_bot">Два тижні безкоштовно</a>
         </div>
       </div>
 
@@ -1412,11 +1443,17 @@ section.acid .plan:not(.main) .btn.ghost {
         </details>
 
         <details>
-          <summary>А якщо ми перестанемо платити?</summary>
+          <summary>Що буде, коли закінчиться безкоштовний період?</summary>
           <p>
-            Ранкова зміна все одно відкриється. Ви втратите довгу історію, графік
-            і звіти, але <b>чек-лист працюватиме</b>. Людина зі шваброю не платила й
-            не винна — блокувати їй роботу через рахунок ми не будемо.
+            Спершу ви втрачаєте те, за що платите: стрічку, історію й сповіщення.
+            А <b>чек-лист у працівників працює ще два тижні</b> — і лише потім усе
+            зупиняється.
+          </p>
+          <p>
+            Причина не в доброті. Людина зі шваброю о сьомій ранку не платила й
+            не винна: якби ми заблокували їй роботу через рахунок, винними були б
+            ми. Тиск при цьому цілком реальний — без стрічки продукт власнику
+            ні для чого.
           </p>
         </details>
       </div>
@@ -1433,7 +1470,7 @@ section.acid .plan:not(.main) .btn.ghost {
       </span>
       <div class="final" data-reveal>
         <h2>Подивіться, що робиться на ваших точках сьогодні</h2>
-        <p>Перша точка безкоштовно й назавжди. Без картки, без дзвінків, без демо на годину.</p>
+        <p>Два тижні безкоштовно, увесь продукт. Без картки, без дзвінків, без демо на годину.</p>
         <a class="btn solid" href="https://t.me/poriadok_app_bot">Відкрити в Telegram</a>
       </div>
     </div>
